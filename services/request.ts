@@ -1,14 +1,16 @@
-import 'isomorphic-fetch';
+import Axios, { AxiosResponse } from 'axios';
 import { NextContext } from 'next';
 import redirect from '../src/redirect';
 
-declare interface RequestConfig { }
+declare interface RequestConfig {
+  method: 'GET';
+  params?: any;
+}
 
-const redirectUnauthenticated = (ctx: NextContext) => (response: Response) => {
+const redirectUnauthenticated = (ctx: NextContext) => (response: AxiosResponse) => {
   if (response.status === 401) {
     redirect(`/logout`, ctx)
   }
-
   return response;
 }
 
@@ -17,9 +19,8 @@ const request = (ctx: NextContext, path: string, opt: RequestConfig) => {
 
   const { authentication } = store.getState();
 
-  return fetch(path, { ...opt, headers: { Authorization: `Bearer ${authentication.token}` } })
+    return Axios(path, { ...opt, headers: { Authorization: `Bearer ${authentication.token}` } })
     .then(redirectUnauthenticated(ctx))
-    .then(response => response.json())
 }
 
 export default request;

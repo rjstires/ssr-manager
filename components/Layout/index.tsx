@@ -37,9 +37,13 @@ type CombinedProps =
   & Props
   & Styles;
 
-class PersistentDrawerLeft extends React.Component<CombinedProps> {
+class Layout extends React.Component<CombinedProps> {
   static defaultProps = {
     title: 'Linode Manager',
+  }
+
+  static getInitialProps = (ctx) => {
+    return { something: false };
   }
 
   state = { open: true };
@@ -53,6 +57,7 @@ class PersistentDrawerLeft extends React.Component<CombinedProps> {
   };
 
   render() {
+    console.log(this.props);
     const { classes, title } = this.props;
     const { open } = this.state;
 
@@ -108,4 +113,5 @@ class PersistentDrawerLeft extends React.Component<CombinedProps> {
   }
 }
 
-export default authenticate(styled(PersistentDrawerLeft));
+
+export default authenticate(styled(Layout));

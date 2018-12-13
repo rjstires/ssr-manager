@@ -2,6 +2,8 @@ import actionCreatorFactory, { AnyAction, isType } from 'typescript-fsa';
 import { getLinodes } from '../../services/linodes';
 import { NextContext } from 'next';
 import { ThunkAction } from 'redux-thunk';
+import { range } from 'ramda';
+import * as Bluebird from 'bluebird';
 
 const actionCreator = actionCreatorFactory(`@@ssr-manager/data/linodes`);
 
@@ -53,6 +55,21 @@ export default (state = initialState, action: AnyAction) => {
 type RequestLinodes = (ctx: NextContext) => ThunkAction<Promise<any>, ApplicationState, undefined, any>;
 export const requestLinodes: RequestLinodes = (ctx) => (dispatch) => {
   return getLinodes(ctx)
+    .then(({ data, page, pages, results }) => {
+      // If we only have one page, return it.
+      if (page === pages) {
+        return Promise.resolve({ data, results });
+      }
+
+      const remaining = range(page + 1, pages + 1)
+
+      return Bluebird.map(remaining, (id) => getLinodes(ctx, { page: id }).then(({ data }) => data))
+        .then((linodesArray) => ({
+          pages,
+          data: linodesArray.reduce((result, current) => [...result, ...current], data),
+          results: results,
+        }))
+    })
     .then(({ data }) => data)
     .then((response) => {
       dispatch(finishLinodesRequest(response));
