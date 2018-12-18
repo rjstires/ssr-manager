@@ -1,1 +1,1 @@
-# Server-side Rendered Manager
+# Server-side Rendered Linode Manager
